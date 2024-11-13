@@ -13,7 +13,14 @@ fi
 
 # invoke insmod with all arguments we got
 # and use a pathname, as insmod doesn't look in . by default
-insmod ./$module.ko $* || exit 1
+echo "Attempting to load our module from /usr/bin/$module.ko"
+
+#insmod /usr/bin/$module.ko $* || exit 1
+insmod /usr/bin/$module.ko $* || {
+    echo "Failed to load module from /usr/bin/$module.ko. Trying /lib/modules/$(uname -r)/extra/$module.ko"
+    # If the first attempt fails, attempt to load from /lib/modules/$(uname -r)/extra
+    insmod /lib/modules/$(uname -r)/extra/$module.ko $* || exit 1
+}
 
 # retrieve major number
 major=$(awk "\$2==\"$module\" {print \$1}" /proc/devices)
